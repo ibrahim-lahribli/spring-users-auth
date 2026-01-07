@@ -9,11 +9,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users") // maps this class to the "users" table in the database
 @Data // generates getters, setters, toString, equals, and hashCode methods
 @AllArgsConstructor
+@NoArgsConstructor
 public class User {
     
     @Id
