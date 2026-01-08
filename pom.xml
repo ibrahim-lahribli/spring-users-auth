@@ -30,7 +30,10 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
-	
+		<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -73,6 +76,7 @@
 
 	<build>
 		<plugins>
+		
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -97,6 +101,148 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
+			<plugin>
+    <groupId>com.diffplug.spotless</groupId>
+    <artifactId>spotless-maven-plugin</artifactId>
+    <version>3.1.0</version>  <!-- still fine in Jan 2026; 3.2.x exists but 3.1.0 is stable -->
+
+    <configuration>
+        <java>
+            <!-- IMPORTANT: includes/excludes go here (not inside cleanthat!) -->
+            <includes>
+                <include>src/main/java/**/*.java</include>
+                <include>src/test/java/**/*.java</include>
+            </includes>
+            <!-- optional: you can exclude generated sources etc. -->
+            <!-- <excludes><exclude>**/generated/**/*.java</exclude></excludes> -->
+
+            <!-- Very reliable & most popular choice -->
+            <googleJavaFormat>
+                <version>1.28.0</version>
+                <style>AOSP</style>
+                <reflowLongStrings>true</reflowLongStrings>
+                <formatJavadoc>true</formatJavadoc>
+            </googleJavaFormat>
+
+            <!-- CleanThat: refactoring step → should come BEFORE formatting -->
+            <cleanthat>
+                <!-- Recommended: specify version explicitly (latest stable as of Jan 2026 ~2.23–2.24) -->
+                <version>2.23</version>
+
+                <!-- Optional but useful: limit to safe & consensual refactorings -->
+                <!-- <mutators><mutator>SafeAndConsensual</mutator></mutators> -->
+
+                <!-- Optional: exclude risky rules if they cause problems -->
+                <!-- <excludedMutators><excludedMutator>OptionalNotEmpty</excludedMutator></excludedMutators> -->
+            </cleanthat>
+
+            <!-- Nice extras (run after CleanThat) -->
+            <removeUnusedImports />
+            <importOrder>
+                <order>
+                    java.,javax.,org.,com.,com.example.,
+                </order>
+            </importOrder>
+        </java>
+
+        <!-- Your existing non-Java formatters -->
+        <format>
+            <includes>
+                <include>pom.xml</include>
+                <include>**/*.md</include>
+            </includes>
+            <trimTrailingWhitespace />
+            <endWithNewline />
+        </format>
+    </configuration>
+
+    <executions>
+        <execution>
+            <goals>
+                <!-- Use 'apply' for auto-fixing + 'check' for CI validation -->
+                <goal>apply</goal>
+                <goal>check</goal>  <!-- recommended: add this for safety -->
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+		<!-- ──────────────────────────────────────────────────────────────── -->
+        <!--                 NEW: Maven Enforcer Plugin                         -->
+        <!-- ──────────────────────────────────────────────────────────────── -->
+       <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-enforcer-plugin</artifactId>
+    <version>3.6.2</version>
+    <executions>
+        <execution>
+            <id>enforce-versions-and-rules</id>
+            <phase>validate</phase>
+            <goals>
+                <goal>enforce</goal>
+            </goals>
+            <configuration>
+                <rules>
+                    <requireJavaVersion>
+                        <version>[17,)</version>   <!-- clearer: at least 17, no upper bound -->
+                        <message>You must use Java 17 or higher (Spring Boot 4.0.1 requirement)</message>
+                    </requireJavaVersion>
+
+                    <requireMavenVersion>
+                        <version>[3.9.0,)</version>
+                        <message>Please upgrade Maven to at least 3.9.0</message>
+                    </requireMavenVersion>
+
+                   
+                </rules>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+
+        <!-- ──────────────────────────────────────────────────────────────── -->
+        <!--                    NEW: PMD Plugin                                 -->
+        <!-- ──────────────────────────────────────────────────────────────── -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <version>3.28.0</version>
+            <configuration>
+                <!-- Fail the build if violations are found (strongly recommended) -->
+                <failOnViolation>true</failOnViolation>
+                <printFailingErrors>true</printFailingErrors>
+
+                <!-- Use a good default ruleset for modern Java/Spring projects -->
+                <rulesets>
+                    <!-- Very good starting point - strict but reasonable -->
+                    <ruleset>/category/java/bestpractices.xml</ruleset>
+                    <ruleset>/category/java/codestyle.xml</ruleset>
+                    <ruleset>/category/java/design.xml</ruleset>
+                    <!-- Optional: add more categories or custom ruleset -->
+                    <!-- <ruleset>rulesets/java/quickstart.xml</ruleset> -->
+                    <!-- <ruleset>${project.basedir}/pmd-ruleset.xml</ruleset> -->
+                </rulesets>
+
+                <!-- Important for Lombok users - tell PMD to understand Lombok -->
+                <pmdJavaAdditionalClasspathElements>
+                    <param>lombok</param>
+                </pmdJavaAdditionalClasspathElements>
+
+                <!-- Nice for CI - faster incremental analysis -->
+                <analysisCache>true</analysisCache>
+                <sourceEncoding>UTF-8</sourceEncoding>
+            </configuration>
+            <executions>
+                <execution>
+                    <id>pmd-check</id>
+                    <phase>verify</phase>
+                    <goals>
+                        <goal>pmd</goal>
+                        <goal>cpd-check</goal> <!-- Optional: fail on copy-paste -->
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>	
 		</plugins>
 	</build>
 
