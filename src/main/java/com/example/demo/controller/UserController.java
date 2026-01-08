@@ -22,8 +22,7 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/users") // base URL for user-related endpoints
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    @Autowired private UserService userService;
 
     @PostMapping
     // @RequestBody : binds the HTTP request body to a transfer or domain object,
