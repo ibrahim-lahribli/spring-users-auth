@@ -100,6 +100,51 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
+			<plugin>
+    <groupId>com.diffplug.spotless</groupId>
+    <artifactId>spotless-maven-plugin</artifactId>
+    <version>3.1.0</version>  <!-- or latest 3.x -->
+
+    <configuration>
+        <java>
+            <!-- Very reliable & most popular choice -->
+            <googleJavaFormat>
+                <version>1.28.0</version>           <!-- latest as of Jan 2026 -->
+                <style>AOSP</style>                 <!-- 4 spaces indent (most people prefer over Google's default 2) -->
+                <!-- Optional but useful -->
+                <reflowLongStrings>true</reflowLongStrings>
+                <formatJavadoc>true</formatJavadoc>
+            </googleJavaFormat>
+
+            <!-- Nice extras -->
+            <removeUnusedImports />
+            <importOrder>
+                <order>
+                    java.,javax.,org.,com.,com.example.,
+                </order>
+            </importOrder>
+        </java>
+
+        <!-- Optional: format other files -->
+        <format>
+            <includes>
+                <include>pom.xml</include>
+                <include>**/*.md</include>
+            </includes>
+            <trimTrailingWhitespace />
+            <endWithNewline />
+        </format>
+    </configuration>
+
+    <executions>
+        <execution>
+            <goals>
+                <goal>check</goal>   <!-- fails CI/build if not formatted -->
+            </goals>
+        </execution>
+    </executions>
+		</plugin>		
 		</plugins>
 	</build>
 

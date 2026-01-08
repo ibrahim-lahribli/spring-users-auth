@@ -32,13 +32,18 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())  // Disable CSRF for stateless REST APIs
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()  // Allow user registration without authentication
-                .anyRequest().authenticated()  // Require authentication for all other requests
-            )
-            .httpBasic(Customizer.withDefaults());  // Use HTTP Basic authentication for secured endpoints
+        http.csrf(csrf -> csrf.disable()) // Disable CSRF for stateless REST APIs
+                .authorizeHttpRequests(
+                        authz ->
+                                authz.requestMatchers(HttpMethod.POST, "/api/users")
+                                        .permitAll() // Allow user registration without
+                                        // authentication
+                                        .anyRequest()
+                                        .authenticated() // Require authentication for all other
+                        // requests
+                        )
+                .httpBasic(Customizer.withDefaults()); // Use HTTP Basic authentication for secured
+        // endpoints
 
         return http.build();
     }
