@@ -1,0 +1,43 @@
+name: Spring Boot CI
+
+on:
+  push:
+    branches: [ dev ]  # Run on pushes to dev
+  pull_request:
+    branches: [ main ]  # Run on PRs to main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # GitHub's VM
+
+    steps:
+    - uses: actions/checkout@v4  # Clone repo
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'  # Reliable JDK
+
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Run Spotless Check (Formatting)
+      run: mvn spotless:check  # Fails if not formatted; complements your pre-commit apply
+
+    - name: Run Verify (Tests, PMD, Enforcer)
+      run: mvn verify  # Runs your tests, PMD, enforcer—fails on issues
+
+    - name: Build JAR
+      run: mvn package -DskipTests  # Builds artifact (skips tests since already run)
+
+    # Optional: Upload artifact for later use (e.g., in CD)
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: spring-boot-app
+        path: target/*.jar
